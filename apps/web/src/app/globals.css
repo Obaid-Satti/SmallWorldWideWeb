@@ -1,0 +1,21 @@
+:root { --ink: #202c32; --muted: #738087; --paper: #f4f5f0; --card: #fffefa; --line: #dce2dc; --green: #42745b; --serif: Georgia, 'Times New Roman', serif; --sans: system-ui, -apple-system, 'Segoe UI', sans-serif; --mono: ui-monospace, 'Cascadia Code', Consolas, monospace; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); }
+.shell { min-height: 100vh; display: flex; flex-direction: column; padding: 0 7vw; }
+.topbar { height: 76px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }
+.brand { color: var(--ink); text-decoration: none; font-family: var(--serif); font-size: 23px; font-weight: 600; letter-spacing: -.04em; }
+.brand span { color: var(--green); }
+.identity { font-size: 13px; color: var(--muted); }.identity strong { color: var(--ink); font-weight: 600; }
+.welcome { width: min(100%, 650px); margin: auto; padding: 100px 0 120px; }
+.eyebrow { color: var(--green); text-transform: uppercase; font: 11px var(--mono); letter-spacing: .12em; }
+h1 { margin: 22px 0 12px; font: 500 clamp(38px, 6vw, 60px)/1.06 var(--serif); letter-spacing: -.045em; }
+.intro { margin: 0 0 36px; color: var(--muted); font-size: 16px; }
+.address, .search { display: flex; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); padding: 9px 10px 9px 16px; }
+.address { box-shadow: 0 10px 30px #25342b0b; }.address span { color: var(--green); font-size: 20px; }
+input { min-width: 0; flex: 1; border: 0; outline: 0; color: var(--ink); background: transparent; font: 15px var(--sans); }
+input::placeholder { color: #9ba5a3; }
+button { border: 0; border-radius: 7px; padding: 10px 17px; color: white; background: var(--green); font: 600 13px var(--sans); cursor: pointer; }
+.search { margin-top: 12px; padding-left: 16px; }.search button { color: var(--green); background: #edf2ec; }
+.setup-note { margin: 20px 0 0; color: #9ba5a3; font: 11px var(--mono); }
+footer { padding: 22px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
