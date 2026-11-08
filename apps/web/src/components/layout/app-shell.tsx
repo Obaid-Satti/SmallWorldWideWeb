@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrowserIdentityPicker } from "./browser-identity-picker";
 
 export function AppShell({
   children,
@@ -40,23 +41,7 @@ export function AppShell({
           </span>
         </Link>
 
-        {/* Right: Identity pill */}
-        <div className="flex items-center gap-2.5 pl-2 pr-3.5 py-1.5 bg-slate-50 border border-slate-200 rounded-full flex-shrink-0">
-          {/* Avatar */}
-          <span className="w-7 h-7 grid place-items-center rounded-full bg-blue-50 text-blue-700 font-semibold text-[11px] flex-shrink-0">
-            O
-          </span>
-          {/* Labels */}
-          <div className="flex flex-col leading-none gap-[3px] hidden sm:flex">
-            <span className="text-[9px] uppercase tracking-widest text-slate-400">Browsing as</span>
-            <span className="text-[12px] font-semibold text-slate-800">Obaid</span>
-          </div>
-          {/* Online dot */}
-          <span
-            aria-hidden="true"
-            className="w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-emerald-100 flex-shrink-0"
-          />
-        </div>
+        <BrowserIdentityPicker />
       </header>
 
       <main className="flex-1 flex flex-col">{children}</main>

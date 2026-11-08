@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { MongooseModule } from "@nestjs/mongoose";
 import { HealthController } from "./health/health.controller";
+import { PeopleModule } from "./people/people.module";
 import { SitesModule } from "./sites/sites.module";
 
 @Module({
@@ -15,6 +16,7 @@ import { SitesModule } from "./sites/sites.module";
       }),
     }),
     SitesModule,
+    PeopleModule,
   ],
   controllers: [HealthController],
 })
