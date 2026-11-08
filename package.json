@@ -5,6 +5,7 @@
   "scripts": {
     "dev:web": "npm --workspace @small-web/web run dev",
     "dev:api": "npm --workspace @small-web/api run start:dev",
+    "seed": "node apps/api/scripts/seed.cjs",
     "build": "npm run build --workspaces --if-present"
   }
 }
