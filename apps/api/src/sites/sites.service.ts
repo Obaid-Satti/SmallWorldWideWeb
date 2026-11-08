@@ -69,45 +69,49 @@ export class SitesService {
     const trimmed = query.trim();
     if (!trimmed) return [];
 
-    // Search by regex across title, author, and html
-    const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const regex = new RegExp(escaped, "i");
-
-    const matches = await this.siteModel
-      .find({
-        $or: [
-          { title: regex },
-          { author: regex },
-          { address: regex },
-          { html: regex },
-        ],
-      })
+    const terms = trimmed.toLowerCase().split(/\s+/).filter(Boolean);
+    const sites = await this.siteModel
+      .find()
       .select("address title author html createdAt")
+      .sort({ address: 1 })
       .lean()
       .exec();
 
-    // Extract snippet surrounding the match for rich preview
-    return matches.map((site) => {
-      // Strip HTML tags for clean text excerpt
-      const plainText = site.html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ");
-      const matchIndex = plainText.toLowerCase().indexOf(trimmed.toLowerCase());
-      
-      let snippet = "";
-      if (matchIndex !== -1) {
-        const start = Math.max(0, matchIndex - 50);
-        const end = Math.min(plainText.length, matchIndex + trimmed.length + 70);
-        snippet = (start > 0 ? "…" : "") + plainText.substring(start, end) + (end < plainText.length ? "…" : "");
-      } else {
-        snippet = plainText.substring(0, 110) + (plainText.length > 110 ? "…" : "");
-      }
+    const results = sites.flatMap((site) => {
+      const plainText = site.html
+        .replace(/<!--[\s\S]*?-->/g, " ")
+        .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, " ")
+        .replace(/<[^>]*>/g, " ")
+        .replace(/&nbsp;/gi, " ")
+        .replace(/&amp;/gi, "&")
+        .replace(/&lt;/gi, "<")
+        .replace(/&gt;/gi, ">")
+        .replace(/&quot;/gi, '"')
+        .replace(/&#39;/gi, "'")
+        .replace(/\s+/g, " ")
+        .trim();
+      const searchableText = `${site.title} ${site.author} ${site.address} ${plainText}`.toLowerCase();
+      if (!terms.every((term) => searchableText.includes(term))) return [];
+      const addressMatch = terms.every((term) => site.address.toLowerCase().includes(term));
 
-      return {
+      const textMatchIndex = plainText.toLowerCase().indexOf(terms[0]);
+      const start = textMatchIndex < 0 ? 0 : Math.max(0, textMatchIndex - 50);
+      const end = Math.min(plainText.length, (textMatchIndex < 0 ? 0 : textMatchIndex) + 120);
+      const snippet = `${start > 0 ? "…" : ""}${plainText.substring(start, end)}${end < plainText.length ? "…" : ""}`;
+
+      return [{
         address: site.address,
         title: site.title,
         author: site.author,
         snippet,
         createdAt: site.createdAt,
-      };
+        matchType: addressMatch ? "address" : "content",
+      }];
+    });
+
+    return results.sort((left, right) => {
+      if (left.matchType === right.matchType) return 0;
+      return left.matchType === "address" ? -1 : 1;
     });
   }
 }
