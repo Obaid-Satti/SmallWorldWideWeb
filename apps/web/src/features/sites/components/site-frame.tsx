@@ -1,79 +1,125 @@
-import Link from "next/link";
+"use client";
+
+import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import type { Site } from "../types";
-import { Button, Badge } from "@/components/ui";
-import { AddressForm } from "@/components/forms/address-form";
 
-export function SiteFrame({ site }: { site: Site }) {
+const ADDRESS_PATTERN = /^[a-z0-9-]+(?:\.[a-z0-9-]+)+$/i;
+
+const SITE_LINK_BRIDGE = `<script>
+(function () {
+  window.addEventListener("message", function (event) {
+    if (event.source !== window.parent || !event.data || event.data.type !== "small-web:restore-scroll") return;
+    var x = Number(event.data.scrollX) || 0;
+    var y = Number(event.data.scrollY) || 0;
+    requestAnimationFrame(function () { window.scrollTo(x, y); });
+  });
+
+  window.addEventListener("scroll", function () {
+    window.parent.postMessage({
+      type: "small-web:save-scroll",
+      scrollX: window.scrollX,
+      scrollY: window.scrollY
+    }, "*");
+  }, { passive: true });
+
+  document.addEventListener("click", function (event) {
+    var target = event.target;
+    var anchor = target instanceof Element ? target.closest("a[href]") : null;
+    if (!anchor) return;
+
+    var href = anchor.getAttribute("href");
+    if (!href) return;
+    href = href.trim();
+    if (!href || href.charAt(0) === "#") return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    if (/^[a-z][a-z0-9+.-]*:/i.test(href) && !/^https?:/i.test(href)) return;
+
+    var address = href;
+    if (/^https?:/i.test(href) || /^\\/\\//.test(href)) {
+      try {
+        address = new URL(href, "https://smallweb.invalid").hostname;
+      } catch (_) {
+        return;
+      }
+    } else {
+      address = href.replace(/^(?:\\.\\.\\/|\\.\\/)+/, "").split(/[/?#]/)[0];
+    }
+
+    window.parent.postMessage({ type: "small-web:navigate", address: address }, "*");
+  }, true);
+})();
+</script>`;
+
+function addSiteLinkBridge(html: string) {
+  if (/<\/body\s*>/i.test(html)) {
+    return html.replace(/<\/body\s*>/i, `${SITE_LINK_BRIDGE}</body>`);
+  }
+  return `${html}\n${SITE_LINK_BRIDGE}`;
+}
+
+export function SiteFrame({ site, entryId }: { site: Site; entryId: string }) {
+  const router = useRouter();
+  const frameRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    const storageKey = `small-web-page-state:${entryId}`;
+
+    function handleFrameMessage(event: MessageEvent<unknown>) {
+      if (event.source !== frameRef.current?.contentWindow) return;
+      if (!event.data || typeof event.data !== "object") return;
+
+      const message = event.data as { type?: unknown; address?: unknown; scrollX?: unknown; scrollY?: unknown };
+      if (message.type === "small-web:save-scroll") {
+        const scrollX = Number(message.scrollX);
+        const scrollY = Number(message.scrollY);
+        if (!Number.isFinite(scrollX) || !Number.isFinite(scrollY)) return;
+        try {
+          window.sessionStorage.setItem(storageKey, JSON.stringify({ scrollX, scrollY }));
+        } catch {
+          // Scrolling still works if browser storage is unavailable.
+        }
+        return;
+      }
+
+      if (message.type !== "small-web:navigate" || typeof message.address !== "string") return;
+
+      const address = message.address.trim().toLowerCase();
+      if (address.length > 253 || !ADDRESS_PATTERN.test(address)) return;
+
+      router.push(`/visit?address=${encodeURIComponent(address)}&method=link&entry=${window.crypto.randomUUID()}`);
+    }
+
+    window.addEventListener("message", handleFrameMessage);
+    return () => window.removeEventListener("message", handleFrameMessage);
+  }, [entryId, router]);
+
+  function restoreScrollPosition() {
+    try {
+      const saved = window.sessionStorage.getItem(`small-web-page-state:${entryId}`);
+      if (!saved) return;
+      const position = JSON.parse(saved) as { scrollX?: number; scrollY?: number };
+      frameRef.current?.contentWindow?.postMessage({
+        type: "small-web:restore-scroll",
+        scrollX: position.scrollX ?? 0,
+        scrollY: position.scrollY ?? 0,
+      }, "*");
+    } catch {
+      // The page opens at the top if saved state cannot be read.
+    }
+  }
+
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-8 py-6 flex flex-col gap-6">
-      {/* Navigation bar with AddressForm and Back to Home */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 bg-white border border-slate-200/80 rounded-xl shadow-xs">
-        <div className="flex items-center gap-2">
-          <Link href="/">
-            <Button variant="outline" size="sm" leftIcon={<span>←</span>}>
-              Home
-            </Button>
-          </Link>
-          <Badge variant="primary" hasDot className="font-mono">
-            {site.address}
-          </Badge>
-        </div>
-
-        <div className="flex-1 max-w-md">
-          <AddressForm defaultValue={site.address} />
-        </div>
-
-        <Badge variant="success" hasDot className="hidden md:inline-flex self-center">
-          Sandboxed
-        </Badge>
-      </div>
-
-      {/* Site Header */}
-      <div>
-        <p className="text-[11px] font-mono tracking-widest text-slate-500 uppercase mb-1">
-          {site.address} · Written by {site.author}
-        </p>
-        <h1 className="font-serif text-3xl sm:text-4xl text-slate-900 font-normal tracking-tight">
-          {site.title}
-        </h1>
-      </div>
-
-      {/* Browser Viewport Window Frame */}
-      <div className="w-full bg-white border border-slate-200/90 rounded-xl shadow-sm overflow-hidden flex flex-col">
-        {/* Window Chrome Header */}
-        <div className="h-10 px-4 bg-slate-50/90 border-b border-slate-200/80 flex items-center justify-between text-xs select-none">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 mr-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-400 inline-block" />
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" />
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block" />
-            </div>
-            <span className="font-mono text-[11px] text-slate-600 font-medium">
-              smallweb://{site.address}
-            </span>
-          </div>
-
-          <span className="text-[10px] font-mono text-slate-400">
-            ISOLATED DOCUMENT
-          </span>
-        </div>
-
-        {/* Sandboxed iframe */}
-        <div className="w-full bg-white relative min-h-[540px]">
-          <iframe
-            className="w-full h-full min-h-[540px] border-0 block"
-            title={site.title}
-            sandbox="allow-scripts"
-            srcDoc={site.html}
-          />
-        </div>
-
-        {/* Viewport Footer Bar */}
-        <div className="h-8 px-4 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
-          <span>Containment: sandbox=&quot;allow-scripts&quot;</span>
-          <span>THE SMALL WEB</span>
-        </div>
-      </div>
-    </div>
+    <iframe
+      ref={frameRef}
+      onLoad={restoreScrollPosition}
+      className="block min-h-[calc(100vh-6.25rem)] w-full flex-1 border-0 bg-white"
+      title={`${site.title} — ${site.address}, written by ${site.author}`}
+      sandbox="allow-scripts"
+      srcDoc={addSiteLinkBridge(site.html)}
+    />
   );
 }
