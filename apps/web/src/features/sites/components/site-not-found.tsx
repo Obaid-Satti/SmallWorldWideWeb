@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Button, Alert, Badge } from "@/components/ui";
-import { AddressForm } from "@/components/forms/address-form";
 
 export function SiteNotFound({ address }: { address: string }) {
   return (
@@ -21,10 +20,6 @@ export function SiteNotFound({ address }: { address: string }) {
         There isn’t a site at this address yet. It might be an uncharted link or
         a corner of the small web waiting to be written.
       </p>
-
-      <div className="w-full mb-6">
-        <AddressForm defaultValue={address} />
-      </div>
 
       <Alert variant="warning" className="w-full text-left mb-6">
         <strong>Uncharted Address.</strong> In the small web, links may lead to

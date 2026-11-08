@@ -6,3 +6,11 @@ export type Site = {
   createdAt?: string;
   updatedAt?: string;
 };
+
+export type SearchResult = {
+  address: string;
+  title: string;
+  author: string;
+  snippet: string;
+  createdAt?: string;
+};

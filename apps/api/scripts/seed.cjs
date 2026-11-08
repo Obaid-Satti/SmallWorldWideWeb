@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/small_web";
+const sitesOnly = process.argv.includes("--sites-only");
 
 const sampleSites = [
   {
@@ -331,6 +332,60 @@ const sampleSites = [
   },
 ];
 
+// Longer editorial sections make every seeded page feel like a small, distinct website.
+const editorialSections = {
+  "tidepool.zz": `<section class="story-section"><p class="eyebrow">A closer look · Pool 04</p><h2>A small world between the tides</h2><p>The pool beside the dark seam in the granite is the first to fill and the last to empty. Its rim is marked with tiny white shells, and a fringe of bladderwrack makes a roof that moves whenever the wind changes.</p><p>Look slowly and the water becomes a neighborhood. Periwinkles graze the sunlit edge, a beadlet anemone closes when a shadow passes, and a shore crab keeps to the narrow crack beneath the ledge.</p><aside class="note-card"><strong>Field note</strong><span>Best light: the hour after the tide turns. Bring a pencil; salt air is hard on ink.</span></aside></section>`,
+  "lichen.zz": `<section class="story-section"><p class="eyebrow">A patient map · Granite coast</p><h2>Reading the colors on stone</h2><p>Grey-green patches prefer the damp side of the headland, while the orange crusts gather warmth on its southern face. Their borders are not sharp lines so much as negotiations with rain, salt, and the slow grinding of sand.</p><p>After a storm, the colors deepen. A hand lens reveals a miniature landscape of ridges and cups, each one holding a little water for the next dry afternoon.</p><aside class="note-card"><strong>Try this</strong><span>Return to the same rock next season. Mark its outline in a notebook instead of touching the colony.</span></aside></section>`,
+  "driftwood.zz": `<section class="story-section"><p class="eyebrow">Object study · Collection 42</p><h2>What the sea leaves behind</h2><p>The branch has a pale stripe where it rested against a rock and a darkened end where it spent a winter rolling in the surf. Its old grain is still visible, but every sharp edge has been softened by water and sand.</p><p>On the beach, driftwood makes a temporary archive. A knot may hold a trace of the forest it came from; a clean break tells the story of the last storm more clearly than any label.</p><aside class="note-card"><strong>Collected details</strong><span>Cedar · hand length: 31 cm · found above the spring tide line · left where it was found</span></aside></section>`,
+  "lighthouse.zz": `<section class="story-section"><p class="eyebrow">Night log · North head</p><h2>Keeping time in the dark</h2><p>From the path below, the lantern room appears and disappears behind the headland. The keeper marks each change in visibility, even when the sea seems empty and the beam has no vessel to find.</p><p>Tonight the cloud ceiling is low. Light travels only a short distance before it meets fog, yet that small bright circle is enough to show the harbor mouth and the line of the outer rocks.</p><aside class="note-card"><strong>Keeper’s log · 21:40</strong><span>Wind west by northwest. Visibility fair. One bell heard from the channel.</span></aside></section>`,
+  "foghorn.zz": `<section class="story-section"><p class="eyebrow">Soundings · Channel station</p><h2>How a low note finds its way</h2><p>A horn is useful because fog changes what a sailor can see, not where the shoreline is. The signal gives the darkness a shape: one long note from the headland, followed by a pause long enough to count.</p><p>Inside the station, a brass dial records each sounding. The walls vibrate gently, and cups on the shelf answer with a faint, ordinary rattle.</p><aside class="note-card"><strong>Signal pattern</strong><span>One long blast · 30 seconds of quiet · repeat while visibility is poor.</span></aside></section>`,
+  "ferryman.zz": `<section class="story-section"><p class="eyebrow">Crossing notes · North slipway</p><h2>A forty-minute passage</h2><p>The crossing is short on a map and longer when the tide runs against the boat. Passengers usually gather on the sheltered side, where the crew can call names without raising their voices above the engine.</p><p>On clear mornings, the old cannery appears first as a red roof. On misty afternoons, the ferry follows the bell from the opposite shore and arrives with its railings beaded in salt water.</p><aside class="note-card"><strong>Before you board</strong><span>Arrive a few minutes early. The final evening crossing waits for no one once the harbor light comes on.</span></aside></section>`,
+  "teahouse.zz": `<section class="story-section"><p class="eyebrow">Kitchen notebook · Rainy afternoons</p><h2>A slower cup of tea</h2><p>Warm the pot first, then let the leaves rest for a breath before adding water. The first pour is light and grassy; a second steep brings out the toasted sweetness that suits a wet walk home.</p><p>There is a bench beside the window for anyone waiting out the weather. From there you can watch the ferry turn at the channel marker and the rain travel across the bay in soft grey bands.</p><aside class="note-card"><strong>On the counter today</strong><span>Roasted barley tea, a bowl of mandarins, and a jar of ginger biscuits for the walk.</span></aside></section>`,
+  "solitude.zz": `<section class="story-section"><p class="eyebrow">A practice, not a rulebook</p><h2>Make room for an unhurried hour</h2><p>Quiet is not the absence of sound. It is the moment when the kettle, the rain, and the house settle into the same rhythm. Put the phone in another room and give one page your full attention.</p><p>If a thought keeps returning, write it down without trying to solve it. A short walk after supper often gives the mind enough space to finish the sentence on its own.</p><aside class="note-card"><strong>Tonight’s small plan</strong><span>Make tea · open the window a little · read until the lighthouse makes its next sweep.</span></aside></section>`,
+  "amber.zz": `<section class="story-section"><p class="eyebrow">Natural history · Cabinet 3</p><h2>A forest held in a drop</h2><p>Resin begins as a tree’s response to a wound. Before it hardens, it can catch pollen, a wing, or a grain of dust; over deep time, those small accidents become a record of a vanished forest.</p><p>The inclusions are not perfectly preserved worlds. Their edges are clouded, and the resin itself carries tiny fractures from pressure and age. That is part of what makes each specimen feel particular.</p><aside class="note-card"><strong>Looking closely</strong><span>Turn the specimen toward indirect light. A dark backing often makes fine details easier to see.</span></aside></section>`,
+  "stargaze.zz": `<section class="story-section"><p class="eyebrow">Winter sky · Dune overlook</p><h2>Find the belt, then take your time</h2><p>Orion rises slowly above the waterline. Three bright stars make an easy starting point; from there, look for the reddish glow of Betelgeuse and the colder blue-white light of Rigel.</p><p>Give your eyes several minutes to adjust. The fainter stars appear one by one, and the dark between the constellations begins to look less empty.</p><aside class="note-card"><strong>Tonight’s small kit</strong><span>A warm layer, a dim red light, and a notebook for the patterns you want to remember.</span></aside></section>`,
+};
+
+const sharedPageStyles = `<style>
+  * { box-sizing: border-box; }
+  body { max-width: none !important; min-height: 100vh; margin: 0 !important; padding: 22px !important; }
+  .site-masthead { display: flex; justify-content: space-between; gap: 12px; max-width: 820px; margin: 0 auto 14px; padding: 0 4px; color: inherit; opacity: .72; font: 10px/1.4 ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; }
+  .site-content { max-width: 820px; margin: 0 auto; padding: clamp(26px, 6vw, 68px); border: 1px solid color-mix(in srgb, currentColor 13%, transparent); border-radius: 24px; background: color-mix(in srgb, currentColor 3%, transparent); box-shadow: 0 18px 50px color-mix(in srgb, currentColor 8%, transparent); }
+  h1 { max-width: 16ch; margin-top: 12px; font-size: clamp(2.1rem, 6vw, 4rem) !important; line-height: 1.04; letter-spacing: -.045em; }
+  h2 { margin: 0 0 14px; font-size: clamp(1.35rem, 3vw, 1.8rem); line-height: 1.2; letter-spacing: -.025em; }
+  p { max-width: 66ch; }
+  .eyebrow { margin: 0 0 12px; font: 10px/1.4 ui-monospace, monospace; letter-spacing: .14em; text-transform: uppercase; opacity: .68; }
+  .story-section { margin: 38px 0; padding-top: 28px; border-top: 1px solid color-mix(in srgb, currentColor 16%, transparent); }
+  .story-section p:not(.eyebrow) { font-size: 1.02rem; }
+  .note-card { display: grid; gap: 6px; margin: 22px 0; padding: 16px 18px; border: 1px solid color-mix(in srgb, currentColor 15%, transparent); border-radius: 14px; background: color-mix(in srgb, currentColor 5%, transparent); font-size: .92rem; }
+  ul { padding-left: 1.2rem; }
+  li { margin: .55rem 0; }
+  a { text-underline-offset: 3px; }
+  img, table { max-width: 100%; }
+  @media (max-width: 540px) { body { padding: 12px !important; } .site-masthead { font-size: 8px; } .site-content { padding: 26px 20px; border-radius: 18px; } }
+</style>`;
+
+for (const site of sampleSites) {
+  const section = editorialSections[site.address];
+  const insertionPoints = {
+    "tidepool.zz": '<div class="links-box">',
+    "lichen.zz": "<blockquote>",
+    "driftwood.zz": "<hr>",
+    "lighthouse.zz": "<p>Channels and signals:</p>",
+    "foghorn.zz": "<p>Connections:</p>",
+    "ferryman.zz": "<table>",
+    "teahouse.zz": "  <p>Continue your stroll:</p>",
+    "solitude.zz": "  <ol>",
+    "amber.zz": "  <div class=\"amber-box\">",
+    "stargaze.zz": "  <p>Retrace your steps:</p>",
+  };
+  site.html = site.html
+    .replace("</head>", `${sharedPageStyles}</head>`)
+    .replace("<body>", `<body><div class="site-masthead"><span>The Small Web · Field Journal</span><span>${site.address} · ${site.author}</span></div><main class="site-content">`)
+    .replace(insertionPoints[site.address], `${section}\n  ${insertionPoints[site.address]}`)
+    .replace("</body>", `<footer class="eyebrow">An independent page in the small web · ${site.address}</footer></main></body>`);
+}
+
 const people = [
   "Obaid Satti",
   "Ayesha Khan",
@@ -448,22 +503,24 @@ function generateVisits() {
 }
 
 async function seed() {
-  console.log("Connecting to MongoDB:", uri);
+  console.log("Connecting to MongoDB...");
   await mongoose.connect(uri);
 
   const sitesColl = mongoose.connection.collection("sites");
   const visitsColl = mongoose.connection.collection("visits");
   const peopleColl = mongoose.connection.collection("people");
 
-  await peopleColl.deleteMany({ name: { $nin: people } });
-  for (const name of people) {
-    await peopleColl.updateOne(
-      { name },
-      { $setOnInsert: { name, createdAt: new Date("2026-01-01T09:00:00.000Z") } },
-      { upsert: true },
-    );
+  if (!sitesOnly) {
+    await peopleColl.deleteMany({ name: { $nin: people } });
+    for (const name of people) {
+      await peopleColl.updateOne(
+        { name },
+        { $setOnInsert: { name, createdAt: new Date("2026-01-01T09:00:00.000Z") } },
+        { upsert: true },
+      );
+    }
+    console.log(`Seeded ${people.length} browsing names.`);
   }
-  console.log(`Seeded ${people.length} browsing names.`);
 
   // Upsert sites idempotently
   let insertedSites = 0;
@@ -499,11 +556,13 @@ async function seed() {
     // Index may already exist
   }
 
-  // Reset and seed 1 hour of browsing history across personas
-  await visitsColl.deleteMany({});
-  const visits = generateVisits();
-  await visitsColl.insertMany(visits);
-  console.log(`Seeded ${visits.length} visits across ${people.length} people over the past hour.`);
+  if (!sitesOnly) {
+    // Reset and seed 1 hour of browsing history across personas
+    await visitsColl.deleteMany({});
+    const visits = generateVisits();
+    await visitsColl.insertMany(visits);
+    console.log(`Seeded ${visits.length} visits across ${people.length} people over the past hour.`);
+  }
 
   console.log("Seeding complete!");
 }
