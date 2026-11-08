@@ -332,11 +332,11 @@ const sampleSites = [
 ];
 
 const people = [
-  "Alex",
-  "Mara Finch",
-  "Elena Vance",
-  "Julian Reid",
-  "Samir K.",
+  "Obaid Satti",
+  "Ayesha Khan",
+  "Hamza Ali",
+  "Fatima Noor",
+  "Zain Ahmed",
 ];
 
 // 1 hour of browsing history: spread across the last 60 minutes
@@ -344,7 +344,7 @@ function generateVisits() {
   const baseTime = Date.now();
   const visits = [];
 
-  // Alex: has been nearly everywhere! An extensive trail through the web
+  // Obaid Satti: has been nearly everywhere! An extensive trail through the web
   const alexTrail = [
     { address: "tidepool.zz", title: "Notes from the tide pool", method: "typed", offsetMins: 58 },
     { address: "lichen.zz", title: "The Architecture of Stone and Lichen", method: "link", offsetMins: 54 },
@@ -363,7 +363,7 @@ function generateVisits() {
 
   for (const v of alexTrail) {
     visits.push({
-      person: "Alex",
+      person: "Obaid Satti",
       address: v.address,
       title: v.title,
       method: v.method,
@@ -371,7 +371,7 @@ function generateVisits() {
     });
   }
 
-  // Mara Finch: visited her own pages and checked tea / foghorn
+  // Ayesha Khan: visited a few pages and checked the foghorn
   const maraTrail = [
     { address: "tidepool.zz", title: "Notes from the tide pool", method: "typed", offsetMins: 55 },
     { address: "lighthouse.zz", title: "The Four-Second Sweep", method: "typed", offsetMins: 43 },
@@ -383,7 +383,7 @@ function generateVisits() {
 
   for (const v of maraTrail) {
     visits.push({
-      person: "Mara Finch",
+      person: "Ayesha Khan",
       address: v.address,
       title: v.title,
       method: v.method,
@@ -391,7 +391,7 @@ function generateVisits() {
     });
   }
 
-  // Elena Vance: navigational journey
+  // Hamza Ali: navigational journey
   const elenaTrail = [
     { address: "foghorn.zz", title: "Low Frequencies and Navigational Mist", method: "typed", offsetMins: 50 },
     { address: "ferryman.zz", title: "Timetables for the Strait", method: "link", offsetMins: 38 },
@@ -401,7 +401,7 @@ function generateVisits() {
 
   for (const v of elenaTrail) {
     visits.push({
-      person: "Elena Vance",
+      person: "Hamza Ali",
       address: v.address,
       title: v.title,
       method: v.method,
@@ -409,7 +409,7 @@ function generateVisits() {
     });
   }
 
-  // Julian Reid: stone and wood exploration
+  // Fatima Noor: stone and wood exploration
   const julianTrail = [
     { address: "lichen.zz", title: "The Architecture of Stone and Lichen", method: "typed", offsetMins: 48 },
     { address: "driftwood.zz", title: "Carvings from the Tide Line", method: "typed", offsetMins: 32 },
@@ -418,7 +418,7 @@ function generateVisits() {
 
   for (const v of julianTrail) {
     visits.push({
-      person: "Julian Reid",
+      person: "Fatima Noor",
       address: v.address,
       title: v.title,
       method: v.method,
@@ -426,7 +426,7 @@ function generateVisits() {
     });
   }
 
-  // Samir K.: peaceful evening browsing
+  // Zain Ahmed: peaceful evening browsing
   const samirTrail = [
     { address: "teahouse.zz", title: "Steeping Leaves Under Corrugated Tin", method: "typed", offsetMins: 52 },
     { address: "solitude.zz", title: "Twelve Rules for Quiet Evenings", method: "link", offsetMins: 36 },
@@ -436,7 +436,7 @@ function generateVisits() {
 
   for (const v of samirTrail) {
     visits.push({
-      person: "Samir K.",
+      person: "Zain Ahmed",
       address: v.address,
       title: v.title,
       method: v.method,
@@ -453,6 +453,17 @@ async function seed() {
 
   const sitesColl = mongoose.connection.collection("sites");
   const visitsColl = mongoose.connection.collection("visits");
+  const peopleColl = mongoose.connection.collection("people");
+
+  await peopleColl.deleteMany({ name: { $nin: people } });
+  for (const name of people) {
+    await peopleColl.updateOne(
+      { name },
+      { $setOnInsert: { name, createdAt: new Date("2026-01-01T09:00:00.000Z") } },
+      { upsert: true },
+    );
+  }
+  console.log(`Seeded ${people.length} browsing names.`);
 
   // Upsert sites idempotently
   let insertedSites = 0;
