@@ -40,6 +40,13 @@ Open the app at <http://localhost:3002>. Enter `tidepool.zz` in the address box,
 or use **Publish** in the header to add a page under one of the available publisher names.
 The API exposes sites at `http://localhost:3001/sites/:address`.
 
+## Open it from another device on your Wi-Fi
+
+Start both the API and web app on your computer. Find its Wi-Fi IPv4 address with `ipconfig`,
+then open `http://<computer-ip>:3002` on the other device. The API URL follows the same
+hostname on port `3001`; allow Node.js or ports `3001` and `3002` through Windows Firewall
+for your private network if prompted.
+
 The web app runs at <http://localhost:3002>; the API runs at <http://localhost:3001>.
 Make sure your local MongoDB service is running before starting the API. Copy `.env.example` to `.env`
 if you need to change the connection string or ports.
