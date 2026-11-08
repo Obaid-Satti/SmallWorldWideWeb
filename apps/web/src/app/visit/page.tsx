@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { AppShell } from "@/components/layout/app-shell";
-import { getSiteByAddress } from "@/features/sites/api/get-site-by-address";
-import { SiteFrame } from "@/features/sites/components/site-frame";
-import { SiteNotFound } from "@/features/sites/components/site-not-found";
-import { VisitRecorder } from "@/features/visits/components/visit-recorder";
+import { getSiteByAddress } from "@/lib/sites-api";
+import { SiteFrame } from "@/components/sites/site-frame";
+import { SiteNotFound } from "@/components/sites/site-not-found";
+import { VisitRecorder } from "@/components/history/visit-recorder";
 
 export default async function VisitPage({
   searchParams,

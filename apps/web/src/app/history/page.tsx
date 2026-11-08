@@ -1,5 +1,5 @@
 import { AppShell } from "@/components/layout/app-shell";
-import { HistoryList } from "@/features/visits/components/history-list";
+import { HistoryList } from "@/components/history/history-list";
 
 export default function HistoryPage() {
   return (

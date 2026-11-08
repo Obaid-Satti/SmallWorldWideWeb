@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/layout/app-shell";
-import { searchSites } from "@/features/sites/api/search-sites";
+import { searchSites } from "@/lib/sites-api";
 
 export default async function SearchPage({
   searchParams,

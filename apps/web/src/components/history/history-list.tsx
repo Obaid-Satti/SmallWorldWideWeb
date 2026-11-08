@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import type { Visit } from "../types";
+import { API_URL } from "@/lib/config";
+import type { Visit } from "@/types/visit";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 const PERSON_KEY = "small-web-person";
 const PERSON_READY_EVENT = "small-web-person-ready";
 const PERSON_CHANGE_EVENT = "small-web-person-change";

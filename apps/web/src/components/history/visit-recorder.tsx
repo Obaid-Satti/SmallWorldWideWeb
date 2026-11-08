@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { API_URL } from "@/lib/config";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 const PERSON_KEY = "small-web-person";
 const PERSON_READY_EVENT = "small-web-person-ready";
 
