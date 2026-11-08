@@ -1,6 +1,7 @@
 import { Injectable, ConflictException, BadRequestException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
+import { Person, PersonDocument } from "../people/person.schema";
 import { Site, SiteDocument } from "./schemas/site.schema";
 
 export interface CreateSiteDto {
@@ -14,6 +15,7 @@ export interface CreateSiteDto {
 export class SitesService {
   constructor(
     @InjectModel(Site.name) private readonly siteModel: Model<SiteDocument>,
+    @InjectModel(Person.name) private readonly personModel: Model<PersonDocument>,
   ) {}
 
   findAll() {
@@ -43,8 +45,13 @@ export class SitesService {
     if (!data.title?.trim()) {
       throw new BadRequestException("Title is required.");
     }
-    if (!data.author?.trim()) {
+    const author = data.author?.trim();
+    if (!author) {
       throw new BadRequestException("Author name is required.");
+    }
+    const knownPublisher = await this.personModel.exists({ name: author });
+    if (!knownPublisher) {
+      throw new BadRequestException("Choose a publisher from the available names.");
     }
     if (!data.html?.trim()) {
       throw new BadRequestException("HTML page content is required.");
@@ -58,7 +65,7 @@ export class SitesService {
     const created = await this.siteModel.create({
       address: cleanAddress,
       title: data.title.trim(),
-      author: data.author.trim(),
+      author,
       html: data.html.trim(),
     });
 
