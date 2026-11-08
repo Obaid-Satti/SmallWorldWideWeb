@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { API_URL } from "@/lib/config";
+import { createEntryId } from "@/lib/entry-id";
 import type { Person } from "@/types/person";
 
 const PERSON_KEY = "small-web-person";
@@ -69,7 +70,7 @@ export function PublishForm() {
         throw new Error(message || (response.status === 409 ? "That address is already taken." : "Could not publish this page."));
       }
 
-      router.push(`/visit?address=${encodeURIComponent(address.trim().toLowerCase())}&method=typed&entry=${window.crypto.randomUUID()}`);
+      router.push(`/visit?address=${encodeURIComponent(address.trim().toLowerCase())}&method=typed&entry=${createEntryId()}`);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Could not publish this page.");
     } finally {

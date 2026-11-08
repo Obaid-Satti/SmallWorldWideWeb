@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { API_URL } from "@/lib/config";
+import { createEntryId } from "@/lib/entry-id";
 import type { SearchResult } from "@/types/site";
 
 type NavigationCapabilities = EventTarget & {
@@ -105,7 +106,7 @@ export function BrowserToolbar() {
     if (!cleanAddress) return;
     setSuggestionsOpen(false);
     if (ADDRESS_PATTERN.test(cleanAddress)) {
-      router.push(`/visit?address=${encodeURIComponent(cleanAddress)}&method=typed&entry=${window.crypto.randomUUID()}`);
+      router.push(`/visit?address=${encodeURIComponent(cleanAddress)}&method=typed&entry=${createEntryId()}`);
     } else {
       router.push(`/search?q=${encodeURIComponent(cleanAddress)}`);
     }
@@ -113,7 +114,7 @@ export function BrowserToolbar() {
 
   function openAddress(value: string, method: "typed" | "search") {
     setSuggestionsOpen(false);
-    router.push(`/visit?address=${encodeURIComponent(value)}&method=${method}&entry=${window.crypto.randomUUID()}`);
+    router.push(`/visit?address=${encodeURIComponent(value)}&method=${method}&entry=${createEntryId()}`);
   }
 
   return (

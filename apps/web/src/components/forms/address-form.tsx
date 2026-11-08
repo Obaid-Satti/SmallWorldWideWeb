@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { API_URL } from "@/lib/config";
+import { createEntryId } from "@/lib/entry-id";
 import type { SearchResult } from "@/types/site";
 const ADDRESS_PATTERN = /^[a-z0-9-]+(?:\.[a-z0-9-]+)+$/i;
 
@@ -48,7 +49,7 @@ export function AddressForm({ defaultValue = "" }: { defaultValue?: string }) {
     if (!cleanAddress) return;
     setSuggestionsOpen(false);
     if (ADDRESS_PATTERN.test(cleanAddress)) {
-      router.push(`/visit?address=${encodeURIComponent(cleanAddress)}&method=typed&entry=${window.crypto.randomUUID()}`);
+      router.push(`/visit?address=${encodeURIComponent(cleanAddress)}&method=typed&entry=${createEntryId()}`);
     } else {
       router.push(`/search?q=${encodeURIComponent(cleanAddress)}`);
     }
