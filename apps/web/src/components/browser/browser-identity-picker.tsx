@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-type Person = { _id: string; name: string };
+import { API_URL } from "@/lib/config";
+import type { Person } from "@/types/person";
 
 const STORAGE_KEY = "small-web-person";
 const PERSON_READY_EVENT = "small-web-person-ready";
 const PERSON_CHANGE_EVENT = "small-web-person-change";
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 export function BrowserIdentityPicker() {
   const [people, setPeople] = useState<Person[]>([]);

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import type { Site } from "../types";
+import type { Site } from "@/types/site";
 
 const ADDRESS_PATTERN = /^[a-z0-9-]+(?:\.[a-z0-9-]+)+$/i;
 

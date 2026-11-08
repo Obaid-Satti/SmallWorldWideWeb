@@ -12,5 +12,6 @@ export type SearchResult = {
   title: string;
   author: string;
   snippet: string;
+  matchType?: "address" | "content";
   createdAt?: string;
 };

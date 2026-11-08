@@ -3,21 +3,14 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { API_URL } from "@/lib/config";
+import type { SearchResult } from "@/types/site";
 
 type NavigationCapabilities = EventTarget & {
   canGoBack: boolean;
   canGoForward: boolean;
 };
 
-type SearchResult = {
-  address: string;
-  title: string;
-  author: string;
-  snippet: string;
-  matchType: "address" | "content";
-};
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 const ADDRESS_PATTERN = /^[a-z0-9-]+(?:\.[a-z0-9-]+)+$/i;
 
 function ArrowIcon({ direction }: { direction: "back" | "forward" }) {
