@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { createEntryId } from "@/lib/entry-id";
 import type { Site } from "@/types/site";
 
 const ADDRESS_PATTERN = /^[a-z0-9-]+(?:\.[a-z0-9-]+)+$/i;
@@ -90,7 +91,7 @@ export function SiteFrame({ site, entryId }: { site: Site; entryId: string }) {
       const address = message.address.trim().toLowerCase();
       if (address.length > 253 || !ADDRESS_PATTERN.test(address)) return;
 
-      router.push(`/visit?address=${encodeURIComponent(address)}&method=link&entry=${window.crypto.randomUUID()}`);
+      router.push(`/visit?address=${encodeURIComponent(address)}&method=link&entry=${createEntryId()}`);
     }
 
     window.addEventListener("message", handleFrameMessage);
