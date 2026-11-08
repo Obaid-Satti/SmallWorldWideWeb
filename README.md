@@ -1,6 +1,6 @@
 # The Small Web
 
-A small web browser and publishing app, built for the full-stack assessment.
+A small web browser prototype, built for the full-stack assessment.
 
 ## Stack
 
@@ -24,6 +24,15 @@ npm run dev:api
 npm run dev:web
 ```
 
-The web app runs at <http://localhost:3000>; the API runs at <http://localhost:3001>.
+To add the first demo site to your local database:
+
+```sh
+npm run seed
+```
+
+Then enter `tidepool.zz` in the address box. The API also exposes it at
+`http://localhost:3001/sites/tidepool.zz`.
+
+The web app runs at <http://localhost:3002>; the API runs at <http://localhost:3001>.
 Make sure your local MongoDB service is running before starting the API. Copy `.env.example` to `.env`
-if you need to change the connection string or ports. Docker Compose is included as an optional alternative.
+if you need to change the connection string or ports.

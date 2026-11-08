@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "The Small Web",
-  description: "A small web to browse, search, and publish.",
+  description: "Browse a small web of independent pages.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
